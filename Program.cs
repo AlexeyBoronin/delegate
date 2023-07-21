@@ -147,7 +147,7 @@ void DisplayMessage(Account sender, AccountEventArgs e)
         }
         else
         {
-            notify?.Invoke(this, new AccountEventArgs($"Недостаточно денег на счете. Текущий баланс: ",sum));
+            notify?.Invoke(this, new AccountEventArgs($"Недостаточно денег на счете. Текущий баланс:{Sum} ",sum));
         }
     }
     /*int sum;
