@@ -88,12 +88,18 @@ void PrintNullAble(int? number)
     else Console.WriteLine("null");
 }*/
 Account account = new Account(200);
-account.RegisterHandler(PrintSimpleMessage);
-account.RegisterHandler(PrintColorMessage);
+account.Notify+=PrintSimpleMessage;
+/*account.RegisterHandler(PrintColorMessage);
 account.Take(100);
 account.Take(150);
 account.UnregisterHandler(PrintColorMessage);
-account.Take(50);
+account.Take(50);*/
+account.Put(20);
+Console.WriteLine($"Сумма на счете: {account.Sum}");
+account.Take(70);
+Console.WriteLine($"Сумма на счете: {account.Sum}");
+account.Take(180);
+Console.WriteLine($"Сумма на счете: {account.Sum}");
 
 void PrintSimpleMessage(string message)=>Console.WriteLine(message);
 void PrintColorMessage(string message)
@@ -102,10 +108,43 @@ void PrintColorMessage(string message)
     Console.WriteLine(message);
     Console.ResetColor();
 }
-public delegate void AccountHandler(string message);
 public class Account
 {
-    int sum;
+    public delegate void AccountHandler(string message);
+    AccountHandler? notify;
+    public event AccountHandler Notify
+    {
+        add
+        {
+            notify = value;
+            Console.WriteLine($"{value.Method.Name} добавлен");
+        }
+        remove
+        {
+            notify -= value;
+            Console.WriteLine($"{value.Method.Name} удален");
+        }
+    }
+    public Account(int sum) => Sum = sum;
+    public int Sum {get;private set;}
+    public void Put(int sum)
+    {
+        Sum += sum;
+        notify?.Invoke($"На счет поступило: {sum}");
+    }
+    public void Take(int sum)
+    {
+        if(Sum>=sum)
+        {
+            Sum -= sum;
+            notify?.Invoke($"Со счета снято: {sum}");
+        }
+        else
+        {
+            notify?.Invoke($"Недостаточно денег на счете. Текущий баланс: {Sum}");
+        }
+    }
+    /*int sum;
     AccountHandler? taken;
     public Account(int sum)=>this.sum=sum;
     public void RegisterHandler(AccountHandler handler)
@@ -129,7 +168,7 @@ public class Account
             taken?.Invoke($"Недостаточно средств. Баланс: {this.sum} y.e.");
         }
                 
-    }
+    }*/
 }
 class Welcome
 {
