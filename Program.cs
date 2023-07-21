@@ -88,7 +88,7 @@ void PrintNullAble(int? number)
     else Console.WriteLine("null");
 }*/
 Account account = new Account(200);
-account.Notify+=PrintSimpleMessage;
+account.notify+=DisplayMessage;
 /*account.RegisterHandler(PrintColorMessage);
 account.Take(100);
 account.Take(150);
@@ -108,11 +108,17 @@ void PrintColorMessage(string message)
     Console.WriteLine(message);
     Console.ResetColor();
 }
-public class Account
+void DisplayMessage(Account sender, AccountEventArgs e)
 {
-    public delegate void AccountHandler(string message);
-    AccountHandler? notify;
-    public event AccountHandler Notify
+    Console.WriteLine($"Сумма транзакции: {e.Sum}");
+    Console.WriteLine(e.Message);
+    Console.WriteLine($"Текущая сумма на счете: {sender.Sum}");
+}
+ class Account
+{
+    public delegate void AccountHandler(Account sender, AccountEventArgs e);
+    public event AccountHandler? notify;
+    /*public event AccountHandler Notify
     {
         add
         {
@@ -124,24 +130,24 @@ public class Account
             notify -= value;
             Console.WriteLine($"{value.Method.Name} удален");
         }
-    }
+    }*/
     public Account(int sum) => Sum = sum;
     public int Sum {get;private set;}
     public void Put(int sum)
     {
         Sum += sum;
-        notify?.Invoke($"На счет поступило: {sum}");
+        notify?.Invoke(this,new AccountEventArgs($"На счет поступило: {sum}",sum));
     }
     public void Take(int sum)
     {
         if(Sum>=sum)
         {
             Sum -= sum;
-            notify?.Invoke($"Со счета снято: {sum}");
+            notify?.Invoke(this, new AccountEventArgs ($"Со счета снято: {sum}",sum));
         }
         else
         {
-            notify?.Invoke($"Недостаточно денег на счете. Текущий баланс: {Sum}");
+            notify?.Invoke(this, new AccountEventArgs($"Недостаточно денег на счете. Текущий баланс: ",sum));
         }
     }
     /*int sum;
@@ -169,6 +175,16 @@ public class Account
         }
                 
     }*/
+}
+class AccountEventArgs
+{
+    public string Message { get; }
+    public int Sum { get; }
+    public AccountEventArgs(string message, int sum)
+    {
+        Message = message;
+        Sum = sum;
+    }
 }
 class Welcome
 {
